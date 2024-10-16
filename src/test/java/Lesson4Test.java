@@ -6,19 +6,36 @@ import org.junit.jupiter.api.Test;
 import static com.codeborne.selenide.CollectionCondition.texts;
 import static com.codeborne.selenide.Selenide.*;
 
-public class Lesson4Test {
+class Lesson4Test {
+    private static final String URL = "https://github.com/selenide/selenide";
+
     @BeforeAll
-    static void before() {
+    static void setup() {
         Configuration.browserSize = "1920x1080";
-        Configuration.timeout = 6000;
+        Configuration.pageLoadStrategy = "eager";
     }
 
     @Test
-    void checkJUnit5OnWikiPage() {
-        open("https://github.com/selenide/selenide");
-        $("a#wiki-tab").click();
-        $("ul[data-filterable-for='wiki-pages-filter'] li.Box-row.wiki-more-pages-link button").shouldBe(Condition.visible).click();
-        $$("a.Truncate-text.text-bold.py-1").findBy(Condition.text("SoftAssertions")).shouldBe(Condition.visible).click();
-        $("#wiki-content").shouldHave(Condition.text("Using JUnit5 extend test class"));
+    void testJUnit5OnWikiPage() {
+        open(URL);
+        $("#wiki-tab").click();
+        $("ul[data-filterable-for='wiki-pages-filter'] li.Box-row.wiki-more-pages-link button")
+                .shouldBe(Condition.visible).click();
+        $$("a.Truncate-text.text-bold.py-1")
+                .findBy(Condition.text("SoftAssertions"))
+                .shouldBe(Condition.visible)
+                .click();
+        $("#wiki-content").shouldHave(Condition.text(
+                "@ExtendWith({SoftAssertsExtension.class})\n" +
+                        "class Tests {\n" +
+                        "  @Test\n" +
+                        "  void test() {\n" +
+                        "    Configuration.assertionMode = SOFT;\n" +
+                        "    open(\"page.html\");\n" +
+                        "    $(\"#first\").should(visible).click();\n" +
+                        "    $(\"#second\").should(visible).click();\n" +
+                        "  }\n" +
+                        "}"
+        ));
     }
 }
